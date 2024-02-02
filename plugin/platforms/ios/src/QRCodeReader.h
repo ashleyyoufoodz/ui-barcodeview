@@ -162,7 +162,7 @@
  * @return the video orientation correspongind to the given device orientation.
  * @since 3.1.0
  */
-+ (AVCaptureVideoOrientation)videoOrientationFromInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation;
+- (AVCaptureVideoOrientation)videoOrientationFromInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation;
 
 #pragma mark - Managing the Block
 /** @name Managing the Block */

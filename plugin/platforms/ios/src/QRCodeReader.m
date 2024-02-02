@@ -61,6 +61,7 @@
     self.session            = [[AVCaptureSession alloc] init];
     self.previewLayer       = [AVCaptureVideoPreviewLayer layerWithSession:self.session];
 
+
     for (AVCaptureDevice *device in [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo]) {
       if (device.position == AVCaptureDevicePositionFront) {
         self.frontDevice = device;
@@ -83,8 +84,30 @@
 
   [_metadataOutput setMetadataObjectsDelegate:self queue:dispatch_get_main_queue()];
   [self updateObjectTypes];
+
+  // Register for device orientation changes
+  NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+  [center addObserver:self
+           selector:@selector(deviceOrientationDidChange:)
+               name:UIDeviceOrientationDidChangeNotification
+             object:nil];
+
+  // Set current oritation (it will default to portrait)
+  [self updateOrientation];
+
   [_previewLayer setVideoGravity:AVLayerVideoGravityResizeAspectFill];
 }
+
+// Called from notification centre
+- (void)deviceOrientationDidChange:(NSNotification *)notification {
+     [self updateOrientation];
+}
+
+// Set orientation based on the status bar
+- (void)updateOrientation {
+  self.previewLayer.connection.videoOrientation = [self videoOrientationFromInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
+}
+
 
 -(void)updateObjectTypes {
   NSMutableSet *available = [NSMutableSet setWithArray:[_metadataOutput availableMetadataObjectTypes]];
@@ -166,7 +189,7 @@
 
 #pragma mark - Managing the Orientation
 
-+ (AVCaptureVideoOrientation)videoOrientationFromInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+- (AVCaptureVideoOrientation)videoOrientationFromInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
   switch (interfaceOrientation) {
     case UIInterfaceOrientationLandscapeLeft:
